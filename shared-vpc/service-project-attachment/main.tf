@@ -75,6 +75,22 @@ resource "google_compute_firewall" "gke_nginx_admission_webhook" {
   }
 }
 
+resource "google_compute_firewall" "ssh_bastion" {
+  name          = "${var.keboola_stack}-ssh-bastion"
+  network       = var.vpc_host_network_self_link
+  description   = "Allow connections to ssh-bastion nodeport from nodes"
+  priority      = 1000
+  direction     = "INGRESS"
+  disabled      = false
+  source_ranges = [var.gke_nodes_tag]
+  target_tags   = [var.gke_nodes_tag]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["32222"]
+  }
+}
+
 data "google_project" "service_project" {
   project_id = var.gcp_service_project_id
 }
