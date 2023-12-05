@@ -58,10 +58,7 @@ The `filesBucket` (`$FILE_STORAGE_BUCKET_ID`) value is obtained from the output 
 
 Since the last update GCP has added `universe_domain` to the JSON key - please do not fill this field.
 
-Choose the `$STACK_REGION` according to which stack you will register it on:
-
-- `us-east-1` - `https://connection.keboola.com/`
-- `eu-central-1` - `https://connection.eu-central-1.keboola.com/`
+Choose the `$STACK_REGION` according to a region of your deployed Keboola stack.
 
 ```shell
 KBC_MANAGE_API_TOKEN=<your_manage_api_token, "9-faketoken1234567890">
@@ -166,7 +163,9 @@ Note the ID of the new storage backend that is returned in the response (`$NEW_S
 
 #### Assign new file storage and storage backend to organization
 
-Find your organization's maintaner ID in *Keboola Connection*, e.g. `KBC_MAINTAINER_ID=1`
+Find your organization's maintaner ID in *Keboola Connection*, e.g. `KBC_MAINTAINER_ID=1`.
+
+This will assign backend and file storage to the Maintainer, so all projects in the organization will be able to use it.
 
 ```shell
 curl --include \
@@ -211,19 +210,6 @@ curl --include \
   \"fileStorageId\": \"$NEW_FILE_STORAGE_ID\"
 }" \
 "$KBC_URL/manage/projects/$NEW_PROJECT_ID/file-storage"
-```
-
-#### Assign new BigQuery storage backend to new project
-
-```shell
-curl --include \
-      --request POST \
-      --header "Content-Type: application/json" \
-      --header "X-KBC-ManageApiToken: $KBC_MANAGE_API_TOKEN" \
-      --data-binary "{
-  \"storageBackendId\": \"$NEW_STORAGE_BACKEND_ID\"
-}" \
-"$KBC_URL/manage/projects/$NEW_PROJECT_ID/storage-backend"
 ```
 
 🎉 You should now be able to start using the new project with the BigQuery backend.
