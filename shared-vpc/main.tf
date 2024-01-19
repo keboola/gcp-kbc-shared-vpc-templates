@@ -93,6 +93,75 @@ resource "google_compute_subnetwork" "openvpn" {
   ip_cidr_range = "10.200.0.0/24"
 }
 
+## DNS zone for Private Google Access - googleapis.com
+resource "google_dns_managed_zone" "priv_goog_acc_dns_api" {
+  name       = "private-google-access-googleapis"
+  project    = var.gcp_project
+  dns_name   = "googleapis.com."
+  visibility = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.kbc.self_link
+    }
+  }
+}
+
+## DNS A record for Private Google Access
+resource "google_dns_record_set" "priv_goog_acc_dns_api_a" {
+  name         = "private.googleapis.com."
+  project      = var.gcp_project
+  managed_zone = google_dns_managed_zone.priv_goog_acc_dns_api.name
+  type         = "A"
+  ttl          = 300
+  rrdatas      = ["199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11"]
+}
+
+
+## DNS CNAME record for Private Google Access
+resource "google_dns_record_set" "priv_goog_acc_dns_api_cname" {
+  name         = "*.googleapis.com."
+  project      = var.gcp_project
+  managed_zone = google_dns_managed_zone.priv_goog_acc_dns_api.name
+  type         = "CNAME"
+  ttl          = 300
+  rrdatas      = ["private.googleapis.com."]
+}
+
+## DNS zone for Private Google Access - gcr.com
+resource "google_dns_managed_zone" "priv_goog_acc_dns_gcr" {
+  name       = "private-google-access-gcr"
+  project    = var.gcp_project
+  dns_name   = "gcr.io."
+  visibility = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.kbc.self_link
+    }
+  }
+}
+
+## DNS A record for Private Google Access - gcr.io
+resource "google_dns_record_set" "priv_goog_acc_dns_gcr_a" {
+  name         = "gcr.io."
+  project      = var.gcp_project
+  managed_zone = google_dns_managed_zone.priv_goog_acc_dns_gcr.name
+  type         = "A"
+  ttl          = 300
+  rrdatas      = ["199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11"]
+}
+
+## DNS CNAME record for Private Google Access - gcr.io
+resource "google_dns_record_set" "priv_goog_acc_dns_gcr_cname" {
+  name         = "*.gcr.io."
+  project      = var.gcp_project
+  managed_zone = google_dns_managed_zone.priv_goog_acc_dns_gcr.name
+  type         = "CNAME"
+  ttl          = 300
+  rrdatas      = ["gcr.io."]
+}
+
 
 locals {
   test_service_projects_attachments = [

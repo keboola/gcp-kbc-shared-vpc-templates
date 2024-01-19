@@ -6,10 +6,12 @@ resource "google_compute_shared_vpc_service_project" "service_project" {
 
 ## main subnet for GKE
 resource "google_compute_subnetwork" "main" {
-  name          = "${var.keboola_stack}-main"
-  region        = var.gcp_region
-  network       = var.vpc_host_network_self_link
-  ip_cidr_range = var.vpc_main_subnet_primary_ip_cidr_range
+  name                     = "${var.keboola_stack}-main"
+  region                   = var.gcp_region
+  network                  = var.vpc_host_network_self_link
+  ip_cidr_range            = var.vpc_main_subnet_primary_ip_cidr_range
+  private_ip_google_access = true
+
 
   secondary_ip_range {
     range_name    = "gke-pods"
