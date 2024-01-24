@@ -19,12 +19,14 @@
     - `GCP_BILLING_ID`: ID of billing account to which you wish to add projects created as backend for *Keboola Connection*. For more
       information what is billing account, please visit [this link](https://cloud.google.com/billing/docs/how-to/manage-billing-account).
     - `BACKEND_PREFIX`: Prefix to be given to the folder and the main backend project. It is used to differentiate between existing projects and the new backend, or multiple backends in one organization due to the strictness of GCP and project names. The length of the project name is short for GCP, so choose something like initials, i.e. `rb`
+    - `GCP_REGION`: Location of GCS File Storage bucket. You can choose single region (e.g. `europe-west3`) or multi-region (e.g. `us`). See available [locations](https://cloud.google.com/storage/docs/locations#available-locations)
 5. Run:
 
         terraform apply \
           -var folder_id=$GCP_FOLDER_ID \
           -var billing_account_id=$GCP_BILLING_ID \
-          -var backend_prefix=$BACKEND_PREFIX
+          -var backend_prefix=$BACKEND_PREFIX \
+          -var gcp_region=$GCP_REGION
 
 You'll get two outputs from after applying the Terraform:
 
@@ -58,12 +60,12 @@ The `filesBucket` (`$FILE_STORAGE_BUCKET_ID`) value is obtained from the output 
 
 Since the last update GCP has added `universe_domain` to the JSON key - please do not fill this field.
 
-Choose the `$STACK_REGION` according to a region of your deployed Keboola stack.
+Choose the `$BACKEND_REGION` according to a GCP region you have chosen for the backend earlier e.q. `europe-west3`.
 
 ```shell
 KBC_MANAGE_API_TOKEN=<your_manage_api_token, "9-faketoken1234567890">
 FILE_STORAGE_BUCKET_ID=<file_storage_bucket_id from Terraform apply, e.g. "rb-files-bq-driver">
-STACK_REGION=<your_stack_region, e.g. "us-central1">
+BACKEND_REGION=<your_backend_region, e.g. "us-central1">
 KBC_URL=<your_keboola_connection_url, e.g. "https://connection.keboola.foo.bar">
 ```
 
@@ -87,7 +89,7 @@ KBC_URL=<your_keboola_connection_url, e.g. "https://connection.keboola.foo.bar">
     },
     \"filesBucket\": \"$FILE_STORAGE_BUCKET_ID\",
     \"owner\": \"keboola\",
-    \"region\": \"$STACK_REGION\"
+    \"region\": \"$BACKEND_REGION\"
   }" \
   "$KBC_URL/manage/file-storage-gcs"
 ```
@@ -140,7 +142,7 @@ curl --include \
   },
   \"folderId\": \"$BQ_FOLDER_ID\",
   \"owner\": \"keboola\",
-  \"region\": \"$STACK_REGION\"
+  \"region\": \"$BACKEND_REGION\"
 }" \
 "$KBC_URL/manage/storage-backend/bigquery"
 ```

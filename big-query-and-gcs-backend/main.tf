@@ -23,16 +23,20 @@ variable "billing_account_id" {
   type = string
 }
 
-locals {
-  backend_folder_display_name = "${var.backend_prefix}-bq-driver-folder"
-  service_project_name = "main-${var.backend_prefix}-bq-driver"
-  service_project_id = "${var.backend_prefix}-bq-driver"
-  service_account_id = "${var.backend_prefix}-main-service-acc"
+variable "gcp_region" {
+  type = string
 }
 
-variable services {
-  type        = list
-  default     = [
+locals {
+  backend_folder_display_name = "${var.backend_prefix}-bq-driver-folder"
+  service_project_name        = "main-${var.backend_prefix}-bq-driver"
+  service_project_id          = "${var.backend_prefix}-bq-driver"
+  service_account_id          = "${var.backend_prefix}-main-service-acc"
+}
+
+variable "services" {
+  type = list(any)
+  default = [
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
     "iam.googleapis.com",
@@ -54,30 +58,30 @@ resource "google_project" "service_project_in_a_folder" {
 }
 
 resource "google_project_service" "services" {
-  for_each = toset(var.services)
+  for_each                   = toset(var.services)
   project                    = google_project.service_project_in_a_folder.project_id
   service                    = each.key
   disable_dependent_services = false
   disable_on_destroy         = false
-  depends_on = [google_project.service_project_in_a_folder]
+  depends_on                 = [google_project.service_project_in_a_folder]
 }
 
 resource "google_service_account" "service_account" {
-  account_id = local.service_account_id
+  account_id  = local.service_account_id
   description = "Service account to managing keboola backend projects"
-  project = google_project.service_project_in_a_folder.project_id
+  project     = google_project.service_project_in_a_folder.project_id
 }
 
 resource "google_folder_iam_member" "folder_service_acc_project_creator_role" {
-  folder  = data.google_folder.existing_folder.name
-  role    = "roles/resourcemanager.projectCreator"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
+  folder = data.google_folder.existing_folder.name
+  role   = "roles/resourcemanager.projectCreator"
+  member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_folder_iam_member" "folder_service_acc_project_list_role" {
-  folder  = data.google_folder.existing_folder.name
-  role    = "roles/browser"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
+  folder = data.google_folder.existing_folder.name
+  role   = "roles/browser"
+  member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_billing_account_iam_member" "billing_acc_binding" {
@@ -92,11 +96,11 @@ output "service_project_id" {
 }
 
 resource "google_storage_bucket" "kbc_file_storage_backend" {
-  name = "${var.backend_prefix}-files-bq-driver"
-  project = google_project.service_project_in_a_folder.project_id
-  location = "US"
-  storage_class = "STANDARD"
-  force_destroy = true
+  name                     = "${var.backend_prefix}-files-bq-driver"
+  project                  = google_project.service_project_in_a_folder.project_id
+  location                 = var.gcp_region
+  storage_class            = "STANDARD"
+  force_destroy            = true
   public_access_prevention = "enforced"
   versioning {
     enabled = false
