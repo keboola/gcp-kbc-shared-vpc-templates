@@ -32,6 +32,7 @@ locals {
   service_project_name        = "main-${var.backend_prefix}-bq-driver"
   service_project_id          = "${var.backend_prefix}-bq-driver"
   service_account_id          = "${var.backend_prefix}-main-service-acc"
+  service_query_account_id    = "${var.backend_prefix}-query-history-acc"
 }
 
 variable "services" {
@@ -141,4 +142,21 @@ resource "google_project_iam_member" "prj_service_acc_objAdm" {
   project = google_project.service_project_in_a_folder.project_id
   role    = "roles/storage.objectAdmin"
   member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
+# Service account for query history (telemetry)
+resource "google_service_account" "service_account_query_history" {
+  account_id  = local.service_query_account_id
+  description = "Service account for query history"
+  project     = google_project.service_project_in_a_folder.project_id
+}
+
+resource "google_folder_iam_member" "folder_service_acc_query_history_role" {
+  folder = data.google_folder.existing_folder.name
+  role   = "roles/bigquery.resourceViewer"
+  member = "serviceAccount:${google_service_account.service_account_query_history.email}"
+}
+
+output "service_account_query_history_id" {
+  value = google_service_account.service_account_query_history.id
 }
