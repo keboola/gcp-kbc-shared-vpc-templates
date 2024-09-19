@@ -36,7 +36,7 @@ locals {
 }
 
 variable "services" {
-  type = list(any)
+  type    = list(any)
   default = [
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
@@ -157,6 +157,41 @@ resource "google_folder_iam_member" "folder_service_acc_query_history_role" {
   member = "serviceAccount:${google_service_account.service_account_query_history.email}"
 }
 
+resource "google_project_iam_member" "query_history_bq_data_editor" {
+  project = google_project.service_project_in_a_folder.project_id
+  role    = "roles/bigquery.dataEditor"
+  member = "serviceAccount:${google_service_account.service_account_query_history.email}"
+}
+
+resource "google_project_iam_member" "query_history_bq_job_user" {
+  project = google_project.service_project_in_a_folder.project_id
+  role    = "roles/bigquery.jobUser"
+  member = "serviceAccount:${google_service_account.service_account_query_history.email}"
+}
+
+resource "google_storage_bucket" "query_history_extractor" {
+  name                        = "${var.backend_prefix}-q-history"
+  project                     = google_project.service_project_in_a_folder.project_id
+  location                    = var.gcp_region
+  storage_class               = "STANDARD"
+  force_destroy               = true
+  public_access_prevention    = "enforced"
+  uniform_bucket_level_access = true
+  versioning {
+    enabled = false
+  }
+}
+
+resource "google_storage_bucket_iam_member" "query_history_extractor" {
+  bucket = google_storage_bucket.query_history_extractor.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.service_account_query_history.email}"
+}
+
 output "service_account_query_history_id" {
   value = google_service_account.service_account_query_history.id
+}
+
+output "query_history_bucket_id" {
+  value = google_storage_bucket.query_history_extractor.name
 }
