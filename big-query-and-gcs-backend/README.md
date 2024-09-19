@@ -15,18 +15,21 @@
         terraform init
 
 3. Create a new folder in your organization through GCP Console, and note the ID of the folder for the next step, e.g. `GCP_FOLDER_ID=380380380380`.
-4. Set two additional arguments:
-    - `GCP_BILLING_ID`: ID of billing account to which you wish to add projects created as backend for *Keboola Connection*. For more
+4. Create `terraform.tfvars` file:
+```
+folder_id=""
+billing_account_id="01C438-814D25-220303"
+backend_prefix="dev-gcp-us-bq"
+gcp_region="us"
+```
+    - `folder_id`: ID of billing account to which you wish to add projects created as backend for *Keboola Connection*. For more
       information what is billing account, please visit [this link](https://cloud.google.com/billing/docs/how-to/manage-billing-account).
-    - `BACKEND_PREFIX`: Prefix to be given to the folder and the main backend project. It is used to differentiate between existing projects and the new backend, or multiple backends in one organization due to the strictness of GCP and project names. The length of the project name is short for GCP, so choose something like initials, i.e. `rb`
-    - `GCP_REGION`: Location of GCS File Storage bucket. You can choose single region (e.g. `europe-west3`) or multi-region (e.g. `us`). See available [locations](https://cloud.google.com/storage/docs/locations#available-locations)
+    - `backend_prefix`: Prefix to be given to the folder and the main backend project. It is used to differentiate between existing projects and the new backend, or multiple backends in one organization due to the strictness of GCP and project names. The length of the project name is short for GCP, so choose something like initials, i.e. `rb`
+    - `gcp_region`: Location of GCS File Storage bucket. You can choose single region (e.g. `europe-west3`) or multi-region (e.g. `us`). See available [locations](https://cloud.google.com/storage/docs/locations#available-locations)
 5. Run:
-
-        terraform apply \
-          -var folder_id=$GCP_FOLDER_ID \
-          -var billing_account_id=$GCP_BILLING_ID \
-          -var backend_prefix=$BACKEND_PREFIX \
-          -var gcp_region=$GCP_REGION
+```
+        terraform apply
+```
 
 You'll get two outputs from after applying the Terraform:
 
