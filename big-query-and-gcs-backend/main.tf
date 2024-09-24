@@ -31,7 +31,7 @@ locals {
   backend_folder_display_name = "${var.backend_prefix}-bq-driver-folder"
   service_project_name        = "main-${var.backend_prefix}-bq-driver"
   service_project_id          = "${var.backend_prefix}-bq-driver"
-  service_account_id          = "${var.backend_prefix}-main-service-acc"
+  service_account_id          = substr("${var.backend_prefix}-main-service-acc", 0, 30)
   service_query_account_id    = substr("${var.backend_prefix}-query-history-acc", 0, 30)
 }
 
